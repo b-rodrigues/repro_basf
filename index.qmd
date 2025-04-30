@@ -23,12 +23,11 @@ Code available at: [https://github.com/b-rodrigues/repro_basf](https://github.co
 
 ## Thing I want to talk about
 
--   Identify *what* must be managed for reproducibility
--   Learn about the following tools to turn your projects reproducible
-    * {renv}, Docker and Nix
+- What I mean by *reproducibility*
+- What is Nix, how it works and its complementary relationship to Docker
 
 -   What I will *not* discuss (but is very useful!):
-    * FP, Git, Documenting, testing and packaging code, build automation with {targets}
+    * FP, Git, Documenting, testing and packaging code, build automation with `{targets}`
 
 ## What I mean by *reproducibility*
 
@@ -38,28 +37,6 @@ Code available at: [https://github.com/b-rodrigues/repro_basf](https://github.co
 -   Update of data (only impact must be from data update)
 -   Reproducibility as a cornerstone of science
 -   (Work on an immutable dev environment)
-. . .
--   "But if I have the original script and data, what's the problem?"
-
-## A typical project’s setup
-
-- Our project: housing in Luxembourg
-- Data to analyse: `vente-maison-2010-2021.xlsx` in the `data` folder
-- 2 scripts to analyse data (in the `scripts/project_start` folder):
-  1. One to scrape the Excel file [save_data.R](https://raw.githubusercontent.com/b-rodrigues/rap4all/master/scripts/save_data.R)
-  2. One to analyse the data  [analysis.R](https://raw.githubusercontent.com/b-rodrigues/rap4all/master/scripts/analysis.R)
-
-## Project start - What's wrong with these scripts?
-
-- The first two scripts -> script-based workflow
-- Just a long series of calls
-- No functions
-  * difficult to re-use!
-  * difficult to test!
-  * difficult to parallelise!
-  * lots of repetition!
-- Also: usually we want a report not just a script
-- No record of package, nor R, versions used
 
 ## Turning our scripts reproducible
 
@@ -87,16 +64,10 @@ Here are the 4 main things influencing an analysis' reproducibility:
 
 Source: Peng, Roger D. 2011. "Reproducible Research in Computational Science." Science 334 (6060): 1226--27
 
-## Recording packages and R version used with renv
+## Package versioning with `renv`
 
-Create a `renv.lock` file in 2 steps!
-
-- Open an R session in the folder containing the scripts
-- Run `renv::init()` and check the folder for `renv.lock`
-
-. . .
-
-(`renv::init()` will take some time to run the first time)
+- `renv` is commonly used
+- Run `renv::init()` to generate library snapshot as a `renv.lock` file
 
 ## What an `renv.lock` file looks like
 
@@ -141,7 +112,7 @@ Create a `renv.lock` file in 2 steps!
 - Can be used to restore as well!
 - Run `renv::restore()`
 
-## `{renv}` conclusion
+## `{renv}` alone by itself is not enough
 
 Shortcomings:
 
@@ -162,21 +133,12 @@ but... :
 
 ## Going further with Docker: handling R and system-level dependencies
 
-- Docker is a containerisation tool that you install on your computer
+- Docker is a containerisation tool
 - Docker allows you to build *images* and run *containers* (a container is an instance of an image)
 - Docker images:
     1. contain all the software and code needed for your project
     2. are immutable (cannot be changed at run-time)
     3. can be shared on- and offline
-
-## "Hello, Docker!"
-
-- Start by creating a so-called Dockerfile 
-- Dockerfile = recipe for an image, starts off an existing **base image**
-- Build the image: `docker build -t hello .`
-- Run a container: `docker run --rm --name hello_container hello`
-- `--rm`: remove the container after running
-- `--name some_name`: name your container `some_name`
 
 ## Without Docker
 
@@ -187,6 +149,8 @@ but... :
 ![](images/with_docker.png){fig-align="center"}
 
 ## Dockerizing a project (1/3)
+
+Dockerizing a project could look like this:
 
 - At image build-time:
   1. install R (or use an image that ships R)
@@ -200,24 +164,38 @@ but... :
 
 ## Dockerizing a project (2/3)
 
-- The completed and built image can be shared, or just the Dockerfile (and users can then rebuild the image)
-- The outputs will always stay the same!
-- Working interactively using Docker can be challenging though
+- Restoring package with `{renv}` can be tricky:
+
+```
+#> * installing *source* package ‘ModelMetrics’ ...
+#> ** package ‘ModelMetrics’ successfully unpacked and MD5 sums checked
+#> ** using staged installation
+#> ** libs
+#> /usr/bin/clang++ -std=gnu++11 -I"/opt/R-devel/lib64/R/include" -DNDEBUG -I'/home/docker/R/Rcpp/include' -I/usr/local/include -fpic -g -O2 -c RcppExports.cpp -o RcppExports.o
+#> /usr/bin/clang++ -std=gnu++11 -I"/opt/R-devel/lib64/R/include" -DNDEBUG -I'/home/docker/R/Rcpp/include' -I/usr/local/include -fpic -g -O2 -c auc_.cpp -o auc_.o
+#> auc_.cpp:2:10: fatal error: 'omp.h' file not found
+#> #include
+#> ^~~~~~~
+#> 1 error generated.
+#> make: *** [/opt/R-devel/lib64/R/etc/Makeconf:178: auc_.o] Error 1
+#> ERROR: compilation failed for package ‘ModelMetrics’
+```
+
+## Dockerizing a project (2/3)
+
+- The older the `renv.lock` file, the harder to restore!
+- Gets very complicated if you add Python and/or other tools.
 
 ## Dockerizing a project (3/3)
 
-- But! Image build process not reproducible per se, only running containers is
-- YOU need to make sure build process is reproducible (or store the built images)
+- ALSO! Image build process not reproducible per se,
+  only running containers is
+- YOU need to make sure build process is reproducible
+  (or store the built images)
   1. Need to fix version of R
   2. Base image layer becomes unsupported at some point
 
-## The Rocker project
-
-- It is possible to build new images from other images
-- The Rocker project provides many images with R, RStudio, Shiny, and other packages pre-installed
-- I recommend the ["r-ver"](https://rocker-project.org/images/versioned/r-ver.html) images, specifically made for reproducibility
-
-## Docker: a panacea?
+## Docker conclusion
 
 - Docker is very useful and widely used
 - But the entry cost is high (familiarity with Linux is recommended)
@@ -239,8 +217,8 @@ A popular package manager:
 ## The Nix package manager (2/2)
 
 - Reproducibility: R, R packages and other dependencies must be managed
-- Nix is a package manager actually focused on reproducible builds
 - Nix deals with everything, with one single text file (called a Nix expression)!
+- Nix is a package manager actually focused on reproducible builds
 - These Nix expressions *always* build the exact same output
 
 ## A basic Nix expression (1/6)
@@ -325,14 +303,6 @@ pkgs.mkShell {
 - We will include R, LaTeX packages, or Quarto, Python, Julia....
 - Nix takes care of installing every dependency down to the compiler!
 
-## CRAN and Bioconductor
-
-- CRAN is the repository of R packages to extend the language
-- As of writing, +20000 packages available
-- Biocondcutor: repository with a focus on Bioinformatics: +2000 more packages
-- Almost all available through `nixpkgs` in the `rPackages` set!
-- Find packages [here](https://search.nixos.org/packages?channel=unstable&from=0&size=50&sort=relevance&type=packages&query=dplyr)
-
 ## rix: reproducible development environments with Nix (1/5)
 
 - `{rix}` ([website](https://docs.ropensci.org/rix/)) makes writing Nix expression easy!
@@ -343,21 +313,22 @@ pkgs.mkShell {
 ```{r, eval = FALSE}
 library(rix)
 
-rix(r_ver = "4.3.1",
-    #date = "2025-01-27", <- a date also works
-    r_pkgs = c("dplyr", "ggplot2"),
-    system_pkgs = NULL,
-    git_pkgs = NULL,
-    tex_pkgs = NULL,
-    ide = "code",
-    project_path = ".")
+rix(
+  date = "2025-02-17",
+  r_pkgs = "ggplot2",
+  py_conf = list(
+    py_version = "3.12",
+    py_pkgs = c("polars", "great-tables")
+  ),
+  overwrite = TRUE
+)
 ```
 
 ## rix: reproducible development environments with Nix (2/5)
 
 - `renv.lock` files can also be used as starting points:
 
-. . . 
+. . .
 
 ```
 library(rix)
@@ -379,10 +350,9 @@ renv2nix(
 
 ## rix: reproducible development environments with Nix (4/5)
 
-- `rix::rix()` generates a `default.nix` file
-- Build expressions using `nix-build` (in terminal) or `rix::nix_build()` from R 
-- "Drop" into the development environment using `nix-shell`
-- Expressions can be generated even without Nix installed
+- Time for a demonstration, see `scripts/nix_expressions/docker/`
+- First outside of Docker
+- Then we dockerize
 
 ## rix: reproducible development environments with Nix (5/5)
 
