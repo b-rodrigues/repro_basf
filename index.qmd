@@ -27,7 +27,7 @@ Code available at: [https://github.com/b-rodrigues/repro_basf](https://github.co
 - What is Nix, how it works and its complementary relationship to Docker
 
 -   What I will *not* discuss (but is very useful!):
-    * FP, Git, Documenting, testing and packaging code, build automation with `{targets}`
+    * FP, Git, Documenting, testing and packaging code, build automation
 
 ## What I mean by *reproducibility*
 
@@ -156,7 +156,7 @@ Dockerizing a project could look like this:
   1. install R (or use an image that ships R)
   2. install packages (using our `renv.lock` file)
   3. copy all scripts to the image
-  4. run the analysis using `targets::tar_make()`
+  4. run the analysis (non-interactively)
 
 - At container run-time:
   1. copy the outputs of the analysis from the container to your computer
@@ -165,6 +165,8 @@ Dockerizing a project could look like this:
 ## Dockerizing a project (2/3)
 
 - Restoring package with `{renv}` can be tricky:
+
+. . .
 
 ```
 #> * installing *source* package ‘ModelMetrics’ ...
@@ -208,7 +210,7 @@ Package manager: tool to install and manage *packages*
 
 Package: any piece of software (not just R packages)
 
-A popular package manager:
+Example of popular package manager:
 
 . . .
 
@@ -354,15 +356,15 @@ renv2nix(
 - First outside of Docker
 - Then we dockerize
 
+. . .
+
+(you'll find many other examples in the repository)
+
 ## rix: reproducible development environments with Nix (5/5)
 
 - Can install specific versions of packages (write `"dplyr@1.0.0"`)
 - Can install packages hosted on Github
 - Many vignettes to get you started! [See here](https://docs.ropensci.org/rix/articles/)
-
-. . .
-
-Let's check out `scripts/nix_expressions/rix_intro/`
 
 ## Non-interactive use
 
@@ -396,7 +398,8 @@ cd /absolute/path/to/pipeline/ && nix-shell default.nix --run "Rscript -e 'targe
 - At the very least, generate an `renv.lock` file
 - Always possible to rebuild a Docker image in the future (either you, or someone else!)
 - Consider using `{targets}`: not only good for reproducibility, but also an amazing tool all around
-- Long-term reproducibility: must use Docker or Nix (better: both!) and maintenance effort is required as well
+- Long-term reproducibility: must use Nix (with or without Docker) or store Docker images
+- Maybe check out my other packages (in early dev): [`{rixpress}`](https://b-rodrigues.github.io/rixpress/)
 
 ## The end
 
