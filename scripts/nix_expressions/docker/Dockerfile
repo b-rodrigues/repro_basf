@@ -14,7 +14,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/
 
 ENV PATH="${PATH}:/nix/var/nix/profiles/default/bin"
 
-# set up rstats-on-nix cache
+# Set up rstats-on-nix cache
 RUN mkdir -p /root/.config/nix && \
     echo "substituters = https://cache.nixos.org https://rstats-on-nix.cachix.org" > /root/.config/nix/nix.conf && \
     echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= rstats-on-nix.cachix.org-1:vdiiVgocg6WeJrODIqdprZRUrhi1JzhBnXv7aWI6+F0=" >> /root/.config/nix/nix.conf
