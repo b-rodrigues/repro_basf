@@ -27,4 +27,6 @@ RUN nix-shell --run "Rscript generate_env.R"
 
 RUN nix-build
 
+RUN nix-shell
+
 CMD nix-shell
