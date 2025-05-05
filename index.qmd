@@ -153,8 +153,7 @@ but... :
 Dockerizing a project could look like this:
 
 - At image build-time:
-  1. install R (or use an image that ships R)
-  2. install packages (using our `renv.lock` file)
+  1. install R and R packages (or use an image that ships R and `renv.lock`)
   3. copy all scripts to the image
   4. run the analysis (non-interactively)
 
@@ -206,11 +205,11 @@ Dockerizing a project could look like this:
 
 ## The Nix package manager (1/2)
 
-Package manager: tool to install and manage *packages*
+- Package manager: tool to install and manage *packages*
 
-Package: any piece of software (not just R packages)
+- Package: any piece of software (not just R packages)
 
-Example of popular package manager:
+- Example of popular package manager:
 
 . . .
 
@@ -218,7 +217,7 @@ Example of popular package manager:
 
 ## The Nix package manager (2/2)
 
-- Reproducibility: R, R packages and other dependencies must be managed
+- For total reproducibility: R, R packages and other dependencies must be managed
 - Nix deals with everything, with one single text file (called a Nix expression)!
 - Nix is a package manager actually focused on reproducible builds
 - These Nix expressions *always* build the exact same output
